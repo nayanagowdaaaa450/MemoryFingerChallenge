@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Finger Challenge - Web Edition</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- MediaPipe Web CDN Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER HUD -->
+        <header class="game-header">
+            <div class="header-title">
+                <span class="logo-icon">🖐️</span>
+                <h1>MEMORY FINGER CHALLENGE</h1>
+            </div>
+            <div class="hud-badges">
+                <div class="hud-badge round-badge" id="hud-round-container">
+                    <span class="badge-label">ROUND</span>
+                    <span class="badge-value" id="hud-round">1 / 10</span>
+                </div>
+                <div class="hud-badge score-badge" id="hud-score-container">
+                    <span class="badge-label">SCORE</span>
+                    <span class="badge-value" id="hud-score">0</span>
+                </div>
+                <div class="hud-badge timer-badge" id="hud-timer-container">
+                    <span class="badge-label">TIMER</span>
+                    <span class="badge-value" id="hud-timer">8s</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN VIEW CANVAS / CONTAINER -->
+        <main class="game-viewport">
+            
+            <!-- START SCREEN -->
+            <section id="screen-start" class="screen-view active">
+                <div class="glass-card start-card">
+                    <div class="badge-pill">WEB COMPUTER VISION EDITION</div>
+                    <h2>Train Your Visual Memory & Hand Gestures!</h2>
+                    <div class="rules-grid">
+                        <div class="rule-box">
+                            <div class="rule-num">1</div>
+                            <p><strong>Random Mapping</strong>: 5 images get assigned numbers (1 to 5) at game start.</p>
+                        </div>
+                        <div class="rule-box">
+                            <div class="rule-num">2</div>
+                            <p><strong>Memorize</strong>: You get 8 seconds to memorize the temporary mapping.</p>
+                        </div>
+                        <div class="rule-box">
+                            <div class="rule-num">3</div>
+                            <p><strong>Recall & Show</strong>: When an image appears without its number, raise that many fingers to your camera!</p>
+                        </div>
+                    </div>
+                    <button id="btn-start" class="btn btn-primary btn-glow">
+                        <span>START GAME</span>
+                        <small>(or Press SPACE)</small>
+                    </button>
+                </div>
+            </section>
+
+            <!-- MEMORIZATION SCREEN -->
+            <section id="screen-memorize" class="screen-view">
+                <div class="memorize-header">
+                    <h2>MEMORIZE THE MAPPING!</h2>
+                    <p>Numbers will hide when the timer reaches zero.</p>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="memorize-progress" class="progress-bar-fill"></div>
+                </div>
+                <div id="cards-grid" class="cards-grid">
+                    <!-- Cards dynamically rendered by JavaScript -->
+                </div>
+            </section>
+
+            <!-- QUESTION SCREEN -->
+            <section id="screen-question" class="screen-view">
+                <div class="question-split-view">
+                    <!-- Left: Question Image Prompt -->
+                    <div class="glass-card question-card">
+                        <div class="question-header-tag">WHAT WAS THE NUMBER FOR:</div>
+                        <div class="question-img-frame">
+                            <img id="question-img" src="" alt="Question Image">
+                        </div>
+                        <div class="question-img-title" id="question-img-label">CAT</div>
+                        <div class="live-gesture-status-box" id="live-status-box">
+                            <span class="status-icon">🖐️</span>
+                            <span id="live-gesture-text">Show fingers to camera...</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Live Video & Skeleton Feed -->
+                    <div class="glass-card camera-card">
+                        <div class="camera-wrapper">
+                            <video id="webcam-video" playsinline></video>
+                            <canvas id="skeleton-canvas"></canvas>
+                            <div class="camera-overlay-tag">LIVE GESTURE FEED</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FEEDBACK SCREEN OVERLAY -->
+            <div id="feedback-overlay" class="feedback-overlay hidden">
+                <div id="feedback-card" class="glass-card feedback-card">
+                    <div id="feedback-icon" class="feedback-icon">✅</div>
+                    <h2 id="feedback-title">CORRECT!</h2>
+                    <p id="feedback-subtitle">+1 POINT</p>
+                    <div id="feedback-details" class="feedback-details">You showed 4 fingers</div>
+                </div>
+            </div>
+
+            <!-- GAME OVER SCREEN -->
+            <section id="screen-game-over" class="screen-view">
+                <div class="glass-card game-over-card">
+                    <div class="game-over-icon">🏆</div>
+                    <h2>GAME OVER!</h2>
+                    <div class="score-summary-box">
+                        <div class="stat-item">
+                            <span class="stat-label">Final Score</span>
+                            <span class="stat-val" id="final-score">8 / 10</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Accuracy</span>
+                            <span class="stat-val highlight-val" id="final-accuracy">80%</span>
+                        </div>
+                    </div>
+                    <div class="grade-banner" id="grade-banner">EXCELLENT MEMORY! 🏆</div>
+                    <button id="btn-restart" class="btn btn-primary btn-glow">
+                        <span>PLAY AGAIN</span>
+                        <small>(or Press SPACE)</small>
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
