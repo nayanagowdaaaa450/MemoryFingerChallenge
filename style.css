@@ -110,6 +110,32 @@ body {
     color: var(--accent-gold);
 }
 
+.btn-quit {
+    background: rgba(255, 51, 102, 0.15);
+    color: var(--accent-red);
+    border: 1px solid rgba(255, 51, 102, 0.4);
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-quit:hover {
+    background: rgba(255, 51, 102, 0.3);
+    border-color: var(--accent-red);
+    transform: translateY(-1px);
+}
+
+.btn-quit.hidden {
+    display: none !important;
+}
+
 /* GAME VIEWPORT & SCREENS */
 .game-viewport {
     flex: 1;

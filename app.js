@@ -79,6 +79,8 @@ class GameApp {
         this.finalAccuracy = document.getElementById('final-accuracy');
         this.gradeBanner = document.getElementById('grade-banner');
 
+        this.btnQuit = document.getElementById('btn-quit');
+
         this.videoElement = document.getElementById('webcam-video');
         this.canvasElement = document.getElementById('skeleton-canvas');
         this.canvasCtx = this.canvasElement.getContext('2d');
@@ -118,6 +120,7 @@ class GameApp {
     bindEvents() {
         document.getElementById('btn-start').addEventListener('click', () => this.startGame());
         document.getElementById('btn-restart').addEventListener('click', () => this.startGame());
+        this.btnQuit.addEventListener('click', () => this.quitGame());
 
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
@@ -127,8 +130,19 @@ class GameApp {
                 }
             } else if (e.code === 'KeyR') {
                 this.startGame();
+            } else if (e.code === 'Escape' || e.code === 'KeyQ') {
+                this.quitGame();
             }
         });
+    }
+
+    quitGame() {
+        this.clearInterval();
+        this.state = GameState.START;
+        this.feedbackOverlay.classList.add('hidden');
+        this.btnQuit.classList.add('hidden');
+        this.hud.timer.innerText = "8s";
+        this.switchScreen('start');
     }
 
     switchScreen(screenKey) {
@@ -137,6 +151,12 @@ class GameApp {
         });
         if (this.screens[screenKey]) {
             this.screens[screenKey].classList.add('active');
+        }
+
+        if (screenKey === 'start') {
+            this.btnQuit.classList.add('hidden');
+        } else {
+            this.btnQuit.classList.remove('hidden');
         }
     }
 
